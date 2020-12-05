@@ -65,12 +65,12 @@ class MixedGeneratorDataset(torch.utils.data.Dataset):
             if num_classes != 0 and self.cc.settings["network"]["name"] == 'conditional_four_layer_perceptron':
                 FloatTensor = torch.cuda.FloatTensor if is_cuda_enabled() else torch.FloatTensor
                 LongTensor = torch.cuda.LongTensor if is_cuda_enabled() else torch.LongTensor
-                self.labels = LongTensor(np.random.randint(0, num_classes, n_samples))  # random labels between 0 and 9, output of shape batch_size
+                labels = LongTensor(np.random.randint(0, num_classes, n_samples))  # random labels between 0 and 9, output of shape batch_size
 
-                self.labels = self.labels.view(-1, 1)
+                labels = labels.view(-1, 1)
                 labels_onehot = torch.FloatTensor(n_samples, num_classes)
                 labels_onehot.zero_()
-                labels_onehot.scatter_(1, self.labels, 1)
+                labels_onehot.scatter_(1, labels, 1)
 
                 input_labels = to_pytorch_variable(labels_onehot.type(FloatTensor))
 
