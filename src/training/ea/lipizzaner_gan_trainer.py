@@ -126,12 +126,15 @@ class LipizzanerGANTrainer(EvolutionaryAlgorithmTrainer):
             self.mixture_sigma = self.settings["optimize_mixture"].get("mixture_sigma", mixture_sigma)
             self.mixture_generator_samples_mode = self.cc.settings["trainer"]["mixture_generator_samples_mode"]
         else:
-            self.optimize_weights_at_the_end = True
-            self.score_sample_size = es_score_sample_size
-            self.es_generations = n_iterations
-            self.es_random_init = es_random_init
-            self.mixture_sigma = mixture_sigma
-            self.mixture_generator_samples_mode = self.cc.settings["trainer"]["mixture_generator_samples_mode"]
+            if "score" in self.settings and self.settings["score"].get("enabled", calc_mixture):
+                self.optimize_weights_at_the_end = True
+                self.score_sample_size = es_score_sample_size
+                self.es_generations = n_iterations
+                self.es_random_init = es_random_init
+                self.mixture_sigma = mixture_sigma
+                self.mixture_generator_samples_mode = self.cc.settings["trainer"]["mixture_generator_samples_mode"]
+            else:
+                self.optimize_weights_at_the_end = False
 
         assert 0 <= checkpoint_period <= n_iterations, (
             "Checkpoint period paramenter (checkpoint_period) should be "
@@ -406,31 +409,31 @@ class LipizzanerGANTrainer(EvolutionaryAlgorithmTrainer):
             self.test_majority_voting_discriminators(discriminators, dataloader_loaded, train=False)
             self.dataloader.batch_size = batch_size
 
-        if self.optimize_weights_at_the_end:
+        if self.optimize_weights_at_the_end and not self.score_calc is None:
             self.optimize_generator_mixture_weights()
 
-            path_real_images, path_fake_images = self.log_results(
-                batch_size,
-                iteration + 1,
-                input_data,
-                loaded,
-                lr_gen=self.concurrent_populations.generator.individuals[0].learning_rate,
-                lr_dis=self.concurrent_populations.discriminator.individuals[0].learning_rate,
-                score=self.score,
-                mixture_gen=self.neighbourhood.mixture_weights_generators,
-                mixture_dis=self.neighbourhood.mixture_weights_discriminators,
-            )
+        path_real_images, path_fake_images = self.log_results(
+            batch_size,
+            iteration + 1,
+            input_data,
+            loaded,
+            lr_gen=self.concurrent_populations.generator.individuals[0].learning_rate,
+            lr_dis=self.concurrent_populations.discriminator.individuals[0].learning_rate,
+            score=self.score,
+            mixture_gen=self.neighbourhood.mixture_weights_generators,
+            mixture_dis=self.neighbourhood.mixture_weights_discriminators,
+        )
 
-            if self.db_logger.is_enabled:
-                self.db_logger.log_results(
-                    iteration + 1,
-                    self.neighbourhood,
-                    self.concurrent_populations,
-                    self.score,
-                    stop_time - start_time,
-                    path_real_images,
-                    path_fake_images,
-                )
+        if self.db_logger.is_enabled:
+            self.db_logger.log_results(
+                iteration + 1,
+                self.neighbourhood,
+                self.concurrent_populations,
+                self.score,
+                stop_time - start_time,
+                path_real_images,
+                path_fake_images,
+            )
 
         return self.result()
 

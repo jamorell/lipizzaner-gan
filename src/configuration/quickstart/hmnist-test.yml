@@ -1,6 +1,6 @@
 trainer:
   name: lipizzaner_gan
-  n_iterations: 5
+  n_iterations: 3
   calculate_net_weights_dist: True
   # independent_probability, exact_proportion
   mixture_generator_samples_mode: exact_proportion
@@ -33,7 +33,7 @@ network:
   name: conditional_four_layer_perceptron
   loss: bceloss
 master:
-  calculate_score: True
+  calculate_score: False
   score_sample_size: 50000
   cuda: False
 general: !include general.yml
