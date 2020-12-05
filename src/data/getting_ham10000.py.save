@@ -1,0 +1,9 @@
+import os
+
+# create environment variables for kaggle to authenticate with
+os.environ['KAGGLE_USERNAME'] = "jaresearcher"
+os.environ['KAGGLE_KEY'] = "68a36a5e29c376129ab85a8fae8162bc"
+
+
+
+! kaggle datasets list
