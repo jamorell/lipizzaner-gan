@@ -16,7 +16,7 @@ trainer:
     mixture_sigma: 0.01
     enable_selection: True
     score:
-      enabled: True
+      enabled: False
       type: inception_score
       score_sample_size: 1000
       cuda: False

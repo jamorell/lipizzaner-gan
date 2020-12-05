@@ -1,9 +1,14 @@
 import logging
 import os
 from abc import abstractmethod, ABC
+import numpy as np
 
 from helpers.configuration_container import ConfigurationContainer
-from helpers.pytorch_helpers import noise
+from helpers.pytorch_helpers import (
+    to_pytorch_variable,
+    is_cuda_enabled,
+    noise,
+)
 
 import yaml
 from datetime import datetime
@@ -65,6 +70,22 @@ class NeuralNetworkTrainer(ABC):
                 loader.dataset.save_images(input_var, path_real)
 
             z = noise(batch_size, self.network_factory.gen_input_size)
+
+            if self.network_factory.num_classes != 0 and 'conditional' in self.cc.settings["network"]["name"]:
+                FloatTensor = torch.cuda.FloatTensor if is_cuda_enabled() else torch.FloatTensor
+                LongTensor = torch.cuda.LongTensor if is_cuda_enabled() else torch.LongTensor
+                labels = LongTensor(np.random.randint(0, self.network_factory.num_classes,
+                                                      batch_size))  # random labels between 0 and 9, output of shape batch_size
+
+                labels = labels.view(-1, 1)
+                labels_onehot = torch.FloatTensor(batch_size, self.network_factory.num_classes)
+                labels_onehot.zero_()
+                labels_onehot.scatter_(1, labels, 1)
+
+                input_labels = to_pytorch_variable(labels_onehot.type(FloatTensor))
+
+                z = torch.cat((input_labels, z), -1)
+
             if self.cc.settings['dataloader']['dataset_name'] == 'network_traffic':
                 sequence_length = input_var.size(1)
                 z = z.unsqueeze(1).repeat(1,sequence_length,1)
@@ -94,6 +115,22 @@ class NeuralNetworkTrainer(ABC):
                 self.dataloader.save_images(input_var, shape, path_real)
 
             z = noise(batch_size, self.network_factory.gen_input_size)
+
+            if self.network_factory.num_classes != 0 and 'conditional' in self.cc.settings["network"]["name"]:
+                FloatTensor = torch.cuda.FloatTensor if is_cuda_enabled() else torch.FloatTensor
+                LongTensor = torch.cuda.LongTensor if is_cuda_enabled() else torch.LongTensor
+                labels = LongTensor(np.random.randint(0, self.network_factory.num_classes,
+                                                      batch_size))  # random labels between 0 and 9, output of shape batch_size
+
+                labels = labels.view(-1, 1)
+                labels_onehot = torch.FloatTensor(batch_size, self.network_factory.num_classes)
+                labels_onehot.zero_()
+                labels_onehot.scatter_(1, labels, 1)
+
+                input_labels = to_pytorch_variable(labels_onehot.type(FloatTensor))
+
+                z = torch.cat((input_labels, z), -1)
+
             gen = self.population_gen.individuals[0].genome.net
             gen.eval()
             generated_output = gen(z)

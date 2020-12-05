@@ -1,2 +1,2 @@
 #!/bin/bash
-python main.py train --distributed --master -f configuration/quickstart/hmnist.yml #hmnist-test.yml
+python main.py train --distributed --master -f configuration/quickstart/hmnist-test.yml #hmnist-test.yml
