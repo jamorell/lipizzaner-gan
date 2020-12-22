@@ -60,8 +60,8 @@ class HMNISTDataSet(Dataset):
 
         transforms = [Grayscale(num_output_channels=1), Resize(size=[HEIGHT, WIDTH], interpolation=Image.NEAREST), ToTensor(), Normalize(mean=(0.5,), std=(0.5,)), ]
         #transforms = [Resize(size=[HEIGHT, WIDTH], interpolation=Image.NEAREST), ToTensor()]
-        dataset = ImageFolder(root="data/datasets/base_dir/train_dir", transform=Compose(transforms))
-        #dataset = ImageFolder(root="data/datasets/base_dir/train_dir")
+        #dataset = ImageFolder(root="data/datasets/base_dir/train_dir", transform=Compose(transforms))
+        dataset = ImageFolder(root="data/datasets/hmnist_28_28_l_smote", transform=Compose(transforms))
         print(len(dataset))
 
         # Se separan las tuplas en lista de tensores y lista de labels
