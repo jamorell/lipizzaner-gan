@@ -22,5 +22,5 @@ src/data/datasets/*
 
 
 !src/data/datasets/base_dir
-
+!src/data/datasets/hmnist_28_28_l_smote
 
